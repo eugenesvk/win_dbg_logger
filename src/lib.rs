@@ -102,12 +102,12 @@ impl log::Log for WinDbgLogger {
     }
 
     fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) && is_debugger_present() {
+        if self.enabled(record.metadata()) {
             let s = format!(
-                "{}({}): {} - {}\r\n",
-                record.file().unwrap_or("<unknown>"),
+                "{}{}:{} {}",
+                iconify(record.level()),
+                clean_name(record.file()),
                 record.line().unwrap_or(0),
-                record.level(),
                 record.args()
             );
             output_debug_string(&s);
