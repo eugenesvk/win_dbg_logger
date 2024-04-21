@@ -10,9 +10,7 @@ description = "A logger for use with Windows debuggers."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "0.4.*"
-lazy_static = { version = "1.4.0" }
-winapi = { version = "0.3.9", features = [
-    "processthreadsapi",
-] }
-regex = { version = "1.10.4"}
+log        	= "0.4.*"
+lazy_static	= {version="1.4.0" }
+winapi     	= {version="0.3.9", features=["processthreadsapi",]}
+regex      	= {version="1.10.4"}
