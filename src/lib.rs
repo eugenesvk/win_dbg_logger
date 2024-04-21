@@ -82,6 +82,20 @@ pub fn iconify(lvl: log::Level) -> char {
     }
 }
 
+use lazy_static::lazy_static;
+use regex::Regex;
+lazy_static! { // shorten source file name, no src/ no .rs ext
+  static ref reExt:Regex = Regex::new(r"\..*$"   ).unwrap();
+  static ref reSrc:Regex = Regex::new(r"src[\\/]").unwrap();
+}
+fn clean_name(path: Option<&str>) -> String { // remove extension and src paths
+    if let Some(p) = path {
+        reSrc.replace(&reExt.replace(p, ""), "").to_string()
+    } else {
+        "?".to_string()
+    }
+}
+
 impl log::Log for WinDbgLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= Level::Trace
