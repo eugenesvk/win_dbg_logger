@@ -71,6 +71,17 @@ pub struct WinDbgLogger {
 /// ```
 pub static WINDBG_LOGGER: WinDbgLogger = WinDbgLogger { _priv: () };
 
+/// Convert logging levels to shorter and more visible icons
+pub fn iconify(lvl: log::Level) -> char {
+    match lvl {
+        Level::Error => '❗',
+        Level::Warn => '⚠',
+        Level::Info => 'ⓘ',
+        Level::Debug => 'ⓓ',
+        Level::Trace => 'ⓣ',
+    }
+}
+
 impl log::Log for WinDbgLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= Level::Trace
