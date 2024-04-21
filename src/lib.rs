@@ -53,7 +53,31 @@ pub struct WinDbgLogger {
 ///
 /// info!("Hello, world!"); debug!("Hello, world, in detail!"); // Use to log
 /// ```
-pub static WINDBG_LOGGER: WinDbgLogger = WinDbgLogger { _priv: () };
+pub static WINDBG_LOGGER	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Trace	, _priv:()};
+pub static WINDBG_L1    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Error	, _priv:()};
+pub static WINDBG_L2    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Warn 	, _priv:()};
+pub static WINDBG_L3    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Info 	, _priv:()};
+pub static WINDBG_L4    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Debug	, _priv:()};
+pub static WINDBG_L5    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Trace	, _priv:()};
+pub static WINDBG_L0    	:WinDbgLogger = WinDbgLogger {level:LevelFilter::Off  	, _priv:()};
+
+#[cfg(feature = "simple_shared")]
+pub fn windbg_simple_combo(log_lvl:LevelFilter) -> Box<dyn simplelog::SharedLogger> {
+  match log_lvl {
+    LevelFilter::Error	=> Box::new(WINDBG_L1),
+    LevelFilter::Warn 	=> Box::new(WINDBG_L2),
+    LevelFilter::Info 	=> Box::new(WINDBG_L3),
+    LevelFilter::Debug	=> Box::new(WINDBG_L4),
+    LevelFilter::Trace	=> Box::new(WINDBG_L5),
+    LevelFilter::Off  	=> Box::new(WINDBG_L0),
+  }
+}
+#[cfg(feature = "simple_shared")]
+impl simplelog::SharedLogger for WinDbgLogger { // allows using with simplelog's CombinedLogger
+  fn level (&self          ) ->         LevelFilter        {self.level}
+  fn config(&self          ) -> Option<&simplelog::Config> {None}
+  fn as_log( self:Box<Self>) -> Box   <dyn log::Log      > {Box::new(*self)}
+}
 
 /// Convert logging levels to shorter and more visible icons
 pub fn iconify(lvl: log::Level) -> char { match lvl {
@@ -86,7 +110,7 @@ fn clean_name(path: Option<&str>) -> String { // remove extension and src paths
 #[cfg(target_os = "windows")]
 use winapi::um::processthreadsapi::GetCurrentThreadId;
 impl log::Log for WinDbgLogger {
-  fn enabled(&self, metadata: &Metadata) -> bool {metadata.level() <= Level::Trace}
+  fn enabled(&self, metadata: &Metadata) -> bool {metadata.level() <= self.level}
 
   fn log(&self, record: &Record) {
     #[cfg(not(target_os = "windows"))]
