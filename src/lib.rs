@@ -37,6 +37,7 @@ use log::{Level, LevelFilter, Metadata, Record};
 
 /// This implements `log::Log`, and so can be used as a logging provider.
 /// It forwards log messages to the Windows `OutputDebugString` API.
+#[derive(Copy, Clone)]
 pub struct WinDbgLogger {
   /// Allow for `WinDbgLogger` to possibly have more fields in the future
   _priv: (),
