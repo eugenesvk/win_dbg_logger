@@ -82,6 +82,15 @@ pub fn iconify(lvl: log::Level) -> char {
     }
 }
 
+use std::sync::OnceLock;
+pub fn is_thread_state() -> &'static bool {
+    set_thread_state(false)
+}
+pub fn set_thread_state(is: bool) -> &'static bool { // accessor function to avoid get_or_init on every call (lazycell allows doing that without an extra function)
+    static CELL: OnceLock<bool> = OnceLock::new();
+    CELL.get_or_init(|| is)
+}
+
 use lazy_static::lazy_static;
 use regex::Regex;
 lazy_static! { // shorten source file name, no src/ no .rs ext
@@ -96,15 +105,26 @@ fn clean_name(path: Option<&str>) -> String { // remove extension and src paths
     }
 }
 
+#[cfg(target_os = "windows")]
+use winapi::um::processthreadsapi::GetCurrentThreadId;
 impl log::Log for WinDbgLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= Level::Trace
     }
 
     fn log(&self, record: &Record) {
+        #[cfg(not(target_os = "windows"))]
+        let thread_id = "";
+        #[cfg(target_os = "windows")]
+        let thread_id = if *is_thread_state() {
+            format!("{}¦", unsafe { GetCurrentThreadId() })
+        } else {
+            "".to_string()
+        };
         if self.enabled(record.metadata()) {
             let s = format!(
-                "{}{}:{} {}",
+                "{}{}{}:{} {}",
+                thread_id,
                 iconify(record.level()),
                 clean_name(record.file()),
                 record.line().unwrap_or(0),
