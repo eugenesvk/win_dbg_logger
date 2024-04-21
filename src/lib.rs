@@ -37,7 +37,7 @@
 //! }
 //!
 //! fn main() {
-//!     log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER).unwrap();
+//!     log::set_logger(&win_dbg_logger::WINDBG_LOGGER).unwrap();
 //!     log::set_max_level(log::LevelFilter::Debug);
 //!
 //!     do_cool_stuff();
@@ -48,19 +48,19 @@ use log::{Level, LevelFilter, Metadata, Record};
 
 /// This implements `log::Log`, and so can be used as a logging provider.
 /// It forwards log messages to the Windows `OutputDebugString` API.
-pub struct DebuggerLogger {
-    /// Allow for `DebuggerLogger` to possibly have more fields in the future
+pub struct WinDbgLogger {
+    /// Allow for `WinDbgLogger` to possibly have more fields in the future
     _priv: (),
 }
 
-/// This is a static instance of `DebuggerLogger`. Since `DebuggerLogger`
+/// This is a static instance of `WinDbgLogger`. Since `WinDbgLogger`
 /// contains no state, this can be directly registered using `log::set_logger`.
 ///
 /// Example:
 ///
 /// ```
 /// // During initialization:
-/// log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER).unwrap();
+/// log::set_logger(&win_dbg_logger::WINDBG_LOGGER).unwrap();
 /// log::set_max_level(log::LevelFilter::Debug);
 ///
 /// // Throughout your code:
@@ -69,9 +69,9 @@ pub struct DebuggerLogger {
 /// info!("Hello, world!");
 /// debug!("Hello, world, in detail!");
 /// ```
-pub static DEBUGGER_LOGGER: DebuggerLogger = DebuggerLogger { _priv: () };
+pub static WINDBG_LOGGER: WinDbgLogger = WinDbgLogger { _priv: () };
 
-impl log::Log for DebuggerLogger {
+impl log::Log for WinDbgLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= Level::Trace
     }
@@ -136,20 +136,20 @@ pub fn is_debugger_present() -> bool {
     }
 }
 
-/// Sets the `DebuggerLogger` as the currently-active logger.
+/// Sets the `WinDbgLogger` as the currently-active logger.
 ///
-/// If an error occurs when registering `DebuggerLogger` as the current logger,
+/// If an error occurs when registering `WinDbgLogger` as the current logger,
 /// this function will output a warning and will return normally. It will not panic.
-/// This behavior was chosen because `DebuggerLogger` is intended for use in debugging.
+/// This behavior was chosen because `WinDbgLogger` is intended for use in debugging.
 /// Panicking would disrupt debugging and introduce new failure modes. It would also
 /// create problems for mixed-mode debugging, where Rust code is linked with C/C++ code.
 pub fn init() {
-    match log::set_logger(&DEBUGGER_LOGGER) {
+    match log::set_logger(&WINDBG_LOGGER) {
         Ok(()) => {}
         Err(_) => {
             // There's really nothing we can do about it.
             output_debug_string(
-                "Warning: Failed to register DebuggerLogger as the current Rust logger.\r\n",
+                "Warning: Failed to register WinDbgLogger as the current Rust logger.\r\n",
             );
         }
     }
