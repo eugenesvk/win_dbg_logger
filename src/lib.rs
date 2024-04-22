@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals)]
 //! A logger for use with Windows debuggers.
 //!
-//! This crate integrates with the ubiquitous [`log`] crate.
+//! This crate integrates with the ubiquitous [`log`] crate and can be used with the [`simplelog`] crate.
 //!
 //! Windows allows applications to output a string directly to debuggers. This is very useful in situations where other forms of logging are not available.
 //! For example, stderr is not available for GUI apps.
@@ -174,7 +174,7 @@ pub fn is_debugger_present() -> bool {
 pub fn init() {
   match log::set_logger(&WINDBG_LOGGER) {
     Ok(()) => {} //↓ there's really nothing we can do about it.
-    Err(_) => {output_debug_string("Warning: Failed to register WinDbgLogger as the current Rust logger.\r\n",);}
+    Err(_) => {output_debug_string("⚠ Failed to register WinDbgLogger as the current Rust logger\r\n",);}
   }
 }
 
