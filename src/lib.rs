@@ -39,6 +39,7 @@ use log::{Level, LevelFilter, Metadata, Record};
 /// It forwards log messages to the Windows `OutputDebugString` API.
 #[derive(Copy, Clone)]
 pub struct WinDbgLogger {
+  level: LevelFilter,
   /// Allow for `WinDbgLogger` to possibly have more fields in the future
   _priv: (),
 }
